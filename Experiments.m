@@ -108,3 +108,29 @@ for iC = 1:nC
 end
 subplot(211); ylabel('Asset cost decrease'); legend('500','1000'); title('without Hopfield recall');
 subplot(212); ylabel('Asset cost decrease'); legend('500','1000'); title('with Hopfield recall');
+
+%% Remind flood - 1
+
+A = Agent('nTimeSteps', 500);
+A.ImposeFlood(100,0.5, 1000.0);
+A.CycleStore;
+clf; hold on
+plot(A.getAssetCostNoRecall,'b')
+A.RemindFlood(300,100);
+A.RemindFlood(400,100);
+plot(A.getAssetCostNoRecall,'r')
+line([200 200], ylim); line([400 400], ylim);
+ylabel('Asset cost decrease');
+legend('without reminder','with reminder');
+
+%% Corrective
+
+A = Agent('nTimeSteps', 500);
+A.ImposeFlood(100,0.5, 1000.0);
+A.CycleStore;
+clf; hold on
+plot(A.getAssetCostNoRecall,'b')
+A.AlleviateMemory(100, 1.0);
+plot(A.getAssetCostNoRecall,'r')
+ylabel('Asset cost decrease');
+legend('without reminder','with reminder');
