@@ -73,10 +73,38 @@ for iA = 1:nA
 end
 delete(h);
      
-clf; c = 'brgkcym';
+figure; c = 'brgkcym';
 for iS = 1:nS
     subplot(211); hold on; plot(1:500, nanmean(squeeze(ACNR(:,iS,:))), c(iS));
     subplot(212); hold on; plot(1:500, nanmean(squeeze(ACWR(:,iS,:))), c(iS));
 end
 subplot(211); ylabel('Asset cost decrease'); legend('0.1','0.5'); title('without Hopfield recall');
 subplot(212); ylabel('Asset cost decrease'); legend('0.1','0.5'); title('with Hopfield recall');
+
+%% Cost: 10 agents
+nA = 10;
+C = [500 1000];
+nC = length(C);
+
+ACNR = nan(nA,nC,500); 
+ACWR = nan(nA,nC,500);
+
+for iA = 1:nA
+    h = waitbar(iA/nA);
+    for iC = 1:nC
+        A = Agent('nTimeSteps', 500);
+        A.ImposeFlood(100,0.25, C(iC));
+        A.CycleStore;
+        ACNR(iA,iC,:) = A.getAssetCostNoRecall;
+        ACWR(iA,iC,:) = A.getAssetCost(10);
+    end
+end
+delete(h);
+     
+figure; c = 'brgkcym';
+for iC = 1:nC
+    subplot(211); hold on; plot(1:500, nanmean(squeeze(ACNR(:,iC,:))), c(iC));
+    subplot(212); hold on; plot(1:500, nanmean(squeeze(ACWR(:,iC,:))), c(iC));
+end
+subplot(211); ylabel('Asset cost decrease'); legend('500','1000'); title('without Hopfield recall');
+subplot(212); ylabel('Asset cost decrease'); legend('500','1000'); title('with Hopfield recall');
