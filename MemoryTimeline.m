@@ -1,7 +1,7 @@
 classdef MemoryTimeline < handle
     
     properties
-        nT0 = 100; % number of elements in the martingale        
+        nT0 = 200; % number of elements in the martingale        
         nF = 200; % number of elements in the feature space
         nTimeSteps = 1000; % number of timestep
         
@@ -11,10 +11,24 @@ classdef MemoryTimeline < handle
     
     methods
         % constructor
-        function self = MemoryTimeline()
+        function self = MemoryTimeline(varargin)
+            self.processParms(varargin);
             self.T = nan(self.nTimeSteps, self.nT0 + self.nF);
             self.MakePatterns();
         end
+        
+        function processParms(self,V)
+            for iV = 1:2:length(V)
+                switch(V{iV})
+                    case 'nT0', self.nT0 = V{iV+1};
+                    case 'nF', self.nF = V{iV+1};
+                    case 'nTimeSteps', self.nTimeSteps = V{iV+1};
+                    case 'martingaleBits', self.martingaleBits = V{iV+1};
+                end
+            end
+        end
+	
+		
         
         function n = nUnits(self), n = size(self.T,2); end
         function n = nSteps(self), n = size(self.T,1); end
