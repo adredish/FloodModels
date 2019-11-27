@@ -40,7 +40,7 @@ classdef Hopfield < handle
             % P is a set of nP x nU patterns and 
             % alpha is a set of nP weights
             [nP, nU] = size(P); assert(nU == self.nU);
-            assert(size(alpha,1)==nP); assert(size(alpha,2)==1);
+            assert(size(alpha,1)==nP || size(alpha,1)==1); assert(size(alpha,2)==1);
             P(P<=0) = -1; P(P>0) = +1;  % Hopfield
             
             self.W = (alpha .* P)' * P;
@@ -56,7 +56,7 @@ classdef Hopfield < handle
         
         function AddOnePattern(self, P, alpha)
             [nP, nU] = size(P); assert(nU == self.nU);
-            assert(size(alpha,1)==nP); assert(size(alpha,2)==1);
+            assert(size(alpha,1)==nP || size(alpha,1)==1); assert(size(alpha,2)==1);
             self.W = (1-self.tau) * self.W + (alpha .* P)' * P;
             self.W = self.W - eye(self.nU).*self.W;
             if all(isnan(self.P)), self.P = P;
