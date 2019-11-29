@@ -9,7 +9,9 @@ ACR = nan(nA, nTS);
 for iA = 1:nA
     fprintf('.');
     A = Agent('nTimeSteps', nTS);
-    A.AddEventToList({@A.ImposeFlood, 100, 0.5, 25.0});
+    A.AddEventToList({@A.ImposeFlood, 100, 0.25, 5.0});
+    %A.AddEventToList({@A.RemindFlood, 300, 100});
+    A.AddEventToList({@A.AlleviateMemory, 300, 100, 0.5});
     ACR(iA,:) = A.runTimeline();
     delete(A);
 end

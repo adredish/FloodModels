@@ -83,7 +83,7 @@ classdef Agent < handle
             self.wHA = self.wHA + P_now.*rememberedCost/self.H.nU;
         end
         
-        function AlleviateMemory(self, floodTS, alpha)
+        function AlleviateMemory(self, TS, floodTS, alpha)
             % recall flood
             P_then = self.T.getPattern(floodTS);
             P_recalled = self.H.Recall(P_then);
