@@ -5,31 +5,65 @@ classdef Agent < handle
         T; % ExperientialTimeline (includes past and future)
         wHA; % weight matrix from H to A
         baselineAlpha = 0.0001; % baseline storage for all experiences
-        cycleStorage = 50;
-        cycleAlpha = 1.0;
+        nBase = 25;     
+        
+        timelineEvents = {};
+        % ImposeFlood TS alpha cost
+        % RemindFlood TS floodTS
+        % Alleviatememory TS floodTS alpha
     end
     
     methods
         function self = Agent(varargin)
             self.T = feval(@MemoryTimeline,varargin{:});
             self.H = Hopfield(self.T.T, self.baselineAlpha);
-            self.wHA = zeros(1,self.H.nU);     
+            self.wHA = zeros(1,self.H.nU);    
+            self.baselineStore();
         end
         
-        function CycleStore(self, t0, t1)
-            if nargin==1
-                t0 = 1; t1 = self.T.nSteps;
-            end
-            for iT = t0:self.cycleStorage:t1
+        function AddEventToList(self, E)
+            self.timelineEvents{end+1} = E;
+        end
+        
+        function baselineStore(self)
+            for iT = randi(self.T.nSteps, self.nBase,1)
                 P = self.T.getPattern(iT);
-                self.H.AddOnePattern(P, self.cycleAlpha);
+                self.H.AddOnePattern(P, 1.0);
             end
         end
+        
+        % --- 
+        % run timeline
+        function A = runTimeline(self)
+            A = nan(self.T.nSteps,1);
+            eventTS = cellfun(@(x) x{2}, self.timelineEvents, 'UniformOutput', true);  % get times to act
+            for iT = 1:self.T.nSteps                
+                %h = waitbar(iT/self.T.nSteps);
+                f = find(iT==eventTS);
+                if ~isempty(f)
+                    for iF = 1:length(f)
+                        feval(self.timelineEvents{f(iF)}{1}, self.timelineEvents{f(iF)}{2:end});
+                    end
+                end
+                 
+                P = self.T.getPattern(iT);
+                P0 = self.H.Recall(P);
+                A(iT) = P0*self.wHA';
+                
+            end
+            %delete(h);
+            
+            for iA = 2:length(A)
+                if isnan(A(iA)), A(iA) = A(iA-1); end
+            end
+            
+        end
+        
+        % -- events
         
         function ImposeFlood(self, TS, alpha, cost)
             % TS = timestamp ("time of the flood")
             % alpha = salience
-            self.T.ResetMartingale(TS);
             self.H.AddOnePattern(self.T.T(TS:end,:), self.baselineAlpha);
             P = self.T.getPattern(TS);            
             self.H.AddOnePattern(P, alpha);
@@ -59,22 +93,7 @@ classdef Agent < handle
             self.wHA = self.wHA - alpha * P_recalled.*rememberedCost/self.H.nU;
         end
             
-        function A = getAssetCostNoRecall(self)
-            A = self.T.T * self.wHA';
-        end
 
-        function A = getAssetCost(self, cycleSteps)
-            if nargin==1, cycleSteps = 1; end
-            A = nan(self.T.nSteps,1);
-            for iT = 1:cycleSteps:self.T.nSteps
-                P = self.T.getPattern(iT);
-                P0 = self.H.Recall(P);
-                A(iT) = P0*self.wHA';
-            end
-            for iA = 2:length(A)
-                if isnan(A(iA)), A(iA) = A(iA-1); end
-            end
-        end
         
     end
 end    

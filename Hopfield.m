@@ -71,8 +71,12 @@ classdef Hopfield < handle
         
         function X = Recall(self, X0)
             
-            function U = sigmoid(U)  
-                U = tanh(self.beta * U);                
+            %function U = sigmoid(U)  
+            %    U = tanh(self.beta * U);                
+            %end
+            
+            function U = sigmoid(U)
+                U = sign(U);
             end
             
             function ShowOneStep(X)

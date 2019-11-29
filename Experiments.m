@@ -119,7 +119,7 @@ plot(A.getAssetCostNoRecall,'b')
 A.RemindFlood(300,100);
 A.RemindFlood(400,100);
 plot(A.getAssetCostNoRecall,'r')
-line([200 200], ylim); line([400 400], ylim);
+line([300 300], ylim); line([400 400], ylim);
 ylabel('Asset cost decrease');
 legend('without reminder','with reminder');
 

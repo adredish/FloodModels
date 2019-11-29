@@ -26,9 +26,7 @@ classdef MemoryTimeline < handle
                     case 'martingaleBits', self.martingaleBits = V{iV+1};
                 end
             end
-        end
-	
-		
+        end			
         
         function n = nUnits(self), n = size(self.T,2); end
         function n = nSteps(self), n = size(self.T,1); end
