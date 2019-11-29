@@ -1,23 +1,24 @@
-function ACR = EXP_BasicFlood(nA)
+function R = EXP_BasicFlood(nA)
 if nargin==0, nA = 10; end
 
 rng('shuffle');
 
 nTS = 500;
-ACR = nan(nA, nTS);
+ACR = nan(1,nA, nTS);
 
 for iA = 1:nA
     fprintf('.');
     A = Agent('nTimeSteps', nTS);
-    A.AddEventToList({@A.ImposeFlood, 100, 0.25, 5.0});
+    A.AddEventToList({@A.ImposeFlood, 100, 0.5, 20.0});
     %A.AddEventToList({@A.RemindFlood, 300, 100});
-    A.AddEventToList({@A.AlleviateMemory, 300, 100, 0.5});
-    ACR(iA,:) = A.runTimeline();
+    %A.AddEventToList({@A.AlleviateMemory, 300, 100, 0.5});
+    ACR(1,iA,:) = A.runTimeline();
     delete(A);
 end
 
-clf;
-plot(1:nTS, nanmean(ACR), 'b', 1:nTS, ACR, 'b.', 'MarkerSize', 1);
-ylabel('Asset cost decrease');
-line([100 100], ylim, 'color', 'k', 'LineWidth', 0.1);
+R.ACR = ACR;
+R.cases = '';
+R.title = 'Basic Flood';
+R.lines.TS = 100; R.lines.Color='k';
+
 
