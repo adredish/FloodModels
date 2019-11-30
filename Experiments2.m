@@ -2,7 +2,7 @@
 clear; clc
 rng('shuffle');
 %%
-nA = 5;
+nA = 100;
 
 %% A basic flood
 ACR = EXP_BasicFloodwithReminder('nA',nA);
