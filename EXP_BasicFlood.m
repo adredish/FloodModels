@@ -10,8 +10,8 @@ for iA = 1:nA
     fprintf('.');
     A = Agent('nTimeSteps', nTS);
     A.AddEventToList({@A.ImposeFlood, 100, 0.5, 20.0});
-    %A.AddEventToList({@A.RemindFlood, 300, 100});
-    %A.AddEventToList({@A.AlleviateMemory, 300, 100, 0.5});
+    A.AddEventToList({@A.AlleviateMemory, 300, 100, 0.5});
+    %A.AddEventToList({@A.RemindFloodAffectH, 300, 100, 1.0});
     ACR(1,iA,:) = A.runTimeline();
     delete(A);
 end

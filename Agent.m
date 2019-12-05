@@ -71,7 +71,15 @@ classdef Agent < handle
             self.wHA = self.wHA + P.*cost/self.H.nU;
         end
         
-        function RemindFlood(self, TS, floodTS, alpha)
+        function RemindFloodAffectH(self, TS, floodTS, alpha)
+            % recall flood
+            P_then = self.T.getPattern(floodTS);
+            P_recalled = self.H.Recall(P_then);
+            % impose on present
+            self.H.AddOnePattern(P_recalled, alpha);
+        end
+        
+        function RemindFloodAffectW(self, TS, floodTS, alpha)
             % recall flood
             P_now = self.T.getPattern(TS);
             P_then = self.T.getPattern(floodTS);
@@ -80,7 +88,7 @@ classdef Agent < handle
             % recall cost
             rememberedCost = P_recalled * self.wHA';            
             % impose on present
-            self.wHA = self.wHA + alpha * P_now.*rememberedCost/self.H.nU;
+            self.wHA = self.wHA + alpha * P_recalled.*rememberedCost/self.H.nU;
         end
         
         function AlleviateMemory(self, TS, floodTS, alpha)
