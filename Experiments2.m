@@ -19,3 +19,9 @@ Show_ACR(ACRc);
 
 %%
 save FloodData ACR ACRs ACRc
+
+%%
+ACRsR = EXP_Salience('nA',nA,'includeReminder',true);
+Show_ACR(ACRsR);
+ACRcR = EXP_Cost('nA',nA,'includeReminder',true);
+Show_ACR(ACRcR);
