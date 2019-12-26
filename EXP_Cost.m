@@ -1,15 +1,16 @@
 function R = EXP_Cost(varargin)
 
 nA = 25;
+nTS = 500;
 costs = [0 1 5 10 20];
 includeReminder = false;
+includeAlleviation = false;
 process_varargin(varargin);
 
 nS = length(costs);
 
 rng('shuffle');
 
-nTS = 500;
 ACR = nan(nS, nA, nTS);
 
 tic
@@ -22,7 +23,10 @@ for iS = 1:nS
         A = Agent('nTimeSteps', nTS);
         A.AddEventToList({@A.ImposeFlood, 100, 0.5, costs(iS)});
         if includeReminder
-            A.AddEventToList({@A.RemindFlood, 300, 100, 2.0});
+            A.AddEventToList({@A.RemindFloodAffectH, 300, 100, 2.0});
+        end
+        if includeAlleviation
+            A.AddEventToList({@A.AlleviateMemory, 300, 100, 0.5});
         end
         ACR(iS, iA,:) = A.runTimeline();
         delete(A);
@@ -34,7 +38,10 @@ R.ACR = ACR;
 R.separatePlots = false;
 R.cases = costs;
 R.title = 'Costs of flood';
-R.lines.TS = 100; R.lines.Color='k';
+R.lines.TS = 100; R.lines.Color='k'; R.lines.Name = 'Flood';
 if includeReminder
-    R.lines(2).TS = 300; R.lines(2).Color='b';
+    R.lines(end+1).TS = 300; R.lines(end+1).Color='b'; R.lines(end+1).Name = 'Reminder';
+end
+if includeAlleviation
+    R.lines(end+1).TS = 300; R.lines(end+1).Color='g'; R.lines(end+1).Name = 'Alleviation';
 end
