@@ -1,14 +1,16 @@
 function ShowGraphLabels(R, h)
 
 nLines = length(R.lines);
-xTK = nan(nLines,1); xTKL = cell(nLines,1);
+xTK = []; xTKL = {};
 for iL = 1:nLines
-    line(R.lines(iL).TS*[1 1], ylim, 'color', R.lines(iL).Color, 'LineStyle', '--', 'LineWidth', 0.1);
-    xTK(iL) = R.lines(iL).TS;
-    if isfield(R.lines(iL), 'Name')
-        xTKL{iL} = R.lines(iL).Name;
-    else
-        xTKL{iL} = 'Event';
+    if ~isempty(R.lines(iL).Color)
+        line(R.lines(iL).TS*[1 1], ylim, 'color', R.lines(iL).Color, 'LineStyle', '--', 'LineWidth', 0.1);
+        xTK(end+1) = R.lines(iL).TS;
+        if isfield(R.lines(iL), 'Name')
+            xTKL{end+1} = R.lines(iL).Name;
+        else
+            xTKL{end+1} = 'Event';
+        end
     end
 end
 

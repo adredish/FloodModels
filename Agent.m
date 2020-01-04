@@ -71,6 +71,15 @@ classdef Agent < handle
             self.wHA = self.wHA + P.*cost/self.H.nU;
         end
         
+        function MemoryOfMemory(self, TS, floodTS, alpha)
+            P_now = self.T.getPattern(TS);
+            P_then = self.T.getPattern(floodTS);
+            P_recall_then = self.H.Recall(P_then);
+            rememberedCost = P_recall_then * self.wHA';
+            self.H.AddOnePattern(P_now, alpha);
+            self.wHA = self.wHA + P_now .* rememberedCost/self.H.nU;
+        end
+        
         function RemindFloodAffectH(self, TS, floodTS, alpha)
             % recall flood
             P_then = self.T.getPattern(floodTS);

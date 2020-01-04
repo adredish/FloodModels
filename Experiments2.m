@@ -54,3 +54,14 @@ print CostWithReminder.png -dpng
 %%
 Show_ACR(ACRcA); set(gcf, 'units','normalized','outerposition',[0 0 1 1])
 print CostWithAlleviation.png -dpng
+
+%%
+%%
+%%
+%% Media 
+ACRm = EXP_Media('nA',nA, 'nTS', nTS, 'salience', 2.0);
+save FloodData2
+Show_ACR(ACRm); 
+set(gcf, 'units','normalized','outerposition',[0 0 1 1])
+print MediaReminder.png -dpng
+

@@ -40,8 +40,8 @@ R.cases = saliences;
 R.title = 'Salience of flood';
 R.lines.TS = 100; R.lines.Color='k'; R.lines.Name = 'Flood';
 if includeReminder
-    R.lines(end+1).TS = 300; R.lines(end+1).Color='b'; R.lines(end+1).Name = 'Reminder';
+    R.lines(end+1).TS = 300; R.lines(end).Color='b'; R.lines(end).Name = 'Reminder';
 end
 if includeAlleviation
-    R.lines(end+1).TS = 300; R.lines(end+1).Color='g'; R.lines(end+1).Name = 'Alleviation';
+    R.lines(end+1).TS = 300; R.lines(end).Color='g'; R.lines(end).Name = 'Alleviation';
 end
