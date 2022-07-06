@@ -4,11 +4,13 @@ classdef Hopfield < handle
     
     properties
         eta = 1; % noise, chance of flipping anyway
-        beta = 2;
         tau = 0; % decay rate of memory when adding new patterns
-       
+        
         W  % weight matrix
         P % stored patterns
+        
+        sigmoid = @sign;
+        stoppingCriterion = @(X,X0)all(X==X0);
         
         display = false;
     end
@@ -19,7 +21,7 @@ classdef Hopfield < handle
             if length(varargin) == 1 && length(varargin{1})==1 % nU
                 nU = varargin{1};
                 self.W = zeros(nU, nU);
-                self.P = nan(1,nU);                
+                self.P = nan(1,nU);
             else  % P or P, alpha
                 if length(varargin) == 2 % P, alpha
                     P = varargin{1}; A = varargin{2};
@@ -37,7 +39,7 @@ classdef Hopfield < handle
         
         % general methods
         function TrainFromZero(self, P, alpha)
-            % P is a set of nP x nU patterns and 
+            % P is a set of nP x nU patterns and
             % alpha is a set of nP weights
             [nP, nU] = size(P); assert(nU == self.nU);
             assert(size(alpha,1)==nP || size(alpha,1)==1); assert(size(alpha,2)==1);
@@ -66,18 +68,11 @@ classdef Hopfield < handle
                 subplot(211); hold off; plot(nan, nan); hold on; bar(self.P'); title('patterns'); ylim([0 1]);
                 subplot(212); imagesc(self.W); title('weights');
             end
-
+            
         end
         
+       
         function X = Recall(self, X0)
-            
-            %function U = sigmoid(U)  
-            %    U = tanh(self.beta * U);                
-            %end
-            
-            function U = sigmoid(U)
-                U = sign(U);
-            end
             
             function ShowOneStep(X)
                 for iP = 1:self.nP
@@ -98,14 +93,15 @@ classdef Hopfield < handle
                 samples = randperm(self.nU);
                 for iX = samples
                     U = self.W(iX,:) * X';
-                    X(iX) = sigmoid(U + self.eta * randn(size(U)));
+                    X(iX) = self.sigmoid(U + self.eta * randn(size(U)));
                 end
                 
                 if self.display, ShowOneStep(X); title(num2str(iT)); end
-                if all(X==X0)
-                    break; 
+                
+                if self.stoppingCriterion(X,X0)
+                   break;
                 else
-                    X0=X; 
+                    X0=X;                    
                 end
             end
         end
@@ -139,17 +135,17 @@ classdef Hopfield < handle
             for iP = 1:nP
                 P(iP,toFlip) = -P(iP,toFlip);
             end
-        end                       
+        end
         
         function Test
             P = Hopfield.MakePattern(3,100,0.5);
-            H = Hopfield(100);
-            H.display = false;
-            H.TrainFromZero(P, ones(size(P,1),1));
-            X = H.Recall(H.AddNoise(P(1,:),0.2));
-            fprintf('Distance to each pattern after recalling pattern 1 + noise.\n');
-            fprintf('%.2f ', H.DistanceToPatterns(X)); fprintf('\n');
-        end     
+            H = Hopfield(P);
+            for iP = 1:size(P,1)
+                X = H.Recall(H.AddNoise(P(iP,:),0.2));
+                fprintf('Recall P%02d:  ', iP);                
+                fprintf('%.2f ', H.DistanceToPatterns(X)); fprintf('\n');
+            end
+        end
         
         function AlphaTest(alpha)
             if nargin==0, alpha = 1; end
@@ -181,7 +177,7 @@ classdef Hopfield < handle
             nB = 10;
             nU = 100; nP = 30; D1 = nan(nP,1);  Dn = nan(nB,nP);
             for iB = 1:nB
-                P = Hopfield.MakePattern(nP, nU, 0.5);                
+                P = Hopfield.MakePattern(nP, nU, 0.5);
                 H = Hopfield(P(1,:), alpha);
                 H.tau = tau;
                 h = waitbar(iB./nB);
@@ -189,7 +185,7 @@ classdef Hopfield < handle
                     H.AddOnePattern(P(iP,:),1);
                     X = H.Recall(P(1,:));
                     D0 = H.DistanceToPatterns(X); D1(iB,iP) = D0(1);
-                    X = H.Recall(P(iP,:)); 
+                    X = H.Recall(P(iP,:));
                     D0 = H.DistanceToPatterns(X); Dn(iB,iP) = D0(iP);
                 end
             end
@@ -203,6 +199,6 @@ classdef Hopfield < handle
             
         end
         
-     
+        
     end
 end

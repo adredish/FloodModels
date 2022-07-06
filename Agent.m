@@ -1,11 +1,14 @@
 classdef Agent < handle
     
-    properties
+    properties        
         H; % hopfield net for memory 
         T; % ExperientialTimeline (includes past and future)
         wHA; % weight matrix from H to A
-        baselineAlpha = 0.0001; % baseline storage for all experiences
-        nBase = 25;     
+        
+        baselineNoiseAlpha = 0.1; % baseline noise for weight matrix
+        baselineNoiseCost = 0.1; % baseline to put noise into the cost
+        baselineAlpha = 0.06; % baseline storage for all experiences
+        baselineRandStore = 0; % store this many random patterns to put noise in the system        
         
         timelineEvents = {};
         % ImposeFlood TS alpha cost
@@ -14,10 +17,13 @@ classdef Agent < handle
     end
     
     methods
+        function name = Name(self)
+            name = 'Agent with standard hopfield network';
+        end
+
         function self = Agent(varargin)
-            self.T = feval(@MemoryTimeline,varargin{:});
-            self.H = Hopfield(self.T.T, self.baselineAlpha);
-            self.wHA = zeros(1,self.H.nU);    
+            self.T = MemoryTimeline(varargin{:});
+            self.H = Hopfield(self.T.nUnits);
             self.baselineStore();
         end
         
@@ -25,17 +31,37 @@ classdef Agent < handle
             self.timelineEvents{end+1} = E;
         end
         
+        function PrintEventList(self)
+            for iE = 1:length(self.timelineEvents)
+                disp(self.timelineEvents{iE});
+            end
+        end
+        
         function baselineStore(self)
-            for iT = randi(self.T.nSteps, self.nBase,1)
-                P = self.T.getPattern(iT);
+           self.H.W = self.baselineNoiseAlpha * randn(self.T.nUnits);
+           self.wHA = self.baselineNoiseCost * randn(1,self.H.nU) / self.T.nUnits;            
+           for iT = 1:self.baselineRandStore
+                P = self.H.RandPattern();
                 self.H.AddOnePattern(P, 1.0);
             end
+            
         end
         
         % --- 
         % run timeline
-        function A = runTimeline(self)
+        function [A,R,M] = runTimeline(self, varargin)
+            % A is asset cost at time t
+            % R is memory of asset cost given recall of M
+            % M is correlation with old memory
+            flagTestRecall = false; % if nonzero, then is number of trial to compare to
+            process_varargin(varargin);
+            
             A = nan(self.T.nSteps,1);
+            if flagTestRecall
+                R = nan(self.T.nSteps,1);
+                M = nan(self.T.nSteps,1);
+            end
+            
             eventTS = cellfun(@(x) x{2}, self.timelineEvents, 'UniformOutput', true);  % get times to act
             for iT = 1:self.T.nSteps                
                 %h = waitbar(iT/self.T.nSteps);
@@ -44,12 +70,17 @@ classdef Agent < handle
                     for iF = 1:length(f)
                         feval(self.timelineEvents{f(iF)}{1}, self.timelineEvents{f(iF)}{2:end});
                     end
-                end
-                 
+                end                               
+                
                 P = self.T.getPattern(iT);
+                self.H.AddOnePattern(P, self.baselineAlpha);
+                
                 P0 = self.H.Recall(P);
                 A(iT) = P0*self.wHA';
                 
+                if flagTestRecall
+                    [M(iT), R(iT)] = self.TestRecall(iT, flagTestRecall);
+                end                
             end
             %delete(h);
             
@@ -64,26 +95,25 @@ classdef Agent < handle
         function ImposeFlood(self, TS, alpha, cost)
             % TS = timestamp ("time of the flood")
             % alpha = salience
-            self.H.AddOnePattern(self.T.T(TS:end,:), self.baselineAlpha);
-            P = self.T.getPattern(TS);            
+            P = self.T.getPattern(TS);                  
             self.H.AddOnePattern(P, alpha);
             % cost = experienced cost
             self.wHA = self.wHA + P.*cost/self.H.nU;
         end
-        
-        function MemoryOfMemory(self, TS, floodTS, alpha)
-            P_now = self.T.getPattern(TS);
-            P_then = self.T.getPattern(floodTS);
-            P_recall_then = self.H.Recall(P_then);
-            rememberedCost = P_recall_then * self.wHA';
-            self.H.AddOnePattern(P_now, alpha);
-            self.wHA = self.wHA + P_now .* rememberedCost/self.H.nU;
-        end
-        
-        function RemindFloodAffectH(self, TS, floodTS, alpha)
+          
+        function RemindFlood(self, ~, floodTS, alpha)
             % recall flood
             P_then = self.T.getPattern(floodTS);
             P_recalled = self.H.Recall(P_then);
+            % impose on present
+            self.H.AddOnePattern(P_recalled, alpha);
+        end                
+        
+        function RemindFloodE(self, TS, floodTS, alpha)
+            % recall flood
+            P_then = self.T.getPattern(floodTS);
+            P_mix = [repmat(0.5, 1, self.T.nT0), P_then((self.T.nT0+1):end)];
+            P_recalled = self.H.Recall(P_mix);
             % impose on present
             self.H.AddOnePattern(P_recalled, alpha);
         end
@@ -110,6 +140,22 @@ classdef Agent < handle
             self.wHA = self.wHA - alpha * P_recalled.*rememberedCost/self.H.nU;
         end
             
+        function [M,R] = TestRecall(self, TS, floodTS)
+            % recall flood
+            P_now = self.T.getPattern(TS);
+            P_then = self.T.getPattern(floodTS);
+            %P_then(1:self.T.nT0) = rand(self.T.nT0,1)>0.5;
+            P_mix = [P_now(1:self.T.nT0), P_then((self.T.nT0+1):end)];
+            P_recalled = self.H.Recall(P_mix);
+            C = corrcoef(P_recalled, P_then);
+            M = C(2);
+            if M > 0
+                R = P_recalled*self.wHA';
+            else % Hopfield can invert
+                M = -M;
+                R = -P_recalled * self.wHA';
+            end
+        end
 
         
     end
