@@ -95,65 +95,48 @@ classdef Agent < handle
         function ImposeFlood(self, TS, alpha, cost)
             % TS = timestamp ("time of the flood")
             % alpha = salience
+            % cost = experienced cost
             P = self.T.getPattern(TS);                  
             self.H.AddOnePattern(P, alpha);
-            % cost = experienced cost
             self.wHA = self.wHA + P.*cost/self.H.nU;
         end
           
-        function RemindFlood(self, ~, floodTS, alpha)
-            % recall flood
+        function P_recalled = RecallFlood(self, floodTS)
             P_then = self.T.getPattern(floodTS);
-            P_recalled = self.H.Recall(P_then);
-            % impose on present
-            self.H.AddOnePattern(P_recalled, alpha);
-        end                
-        
-        function RemindFloodE(self, TS, floodTS, alpha)
-            % recall flood
-            P_then = self.T.getPattern(floodTS);
-            P_mix = [repmat(0.5, 1, self.T.nT0), P_then((self.T.nT0+1):end)];
+            P_mix = [zeros(1, self.T.nT0), P_then((self.T.nT0+1):end)];
             P_recalled = self.H.Recall(P_mix);
-            % impose on present
-            self.H.AddOnePattern(P_recalled, alpha);
         end
         
-        function RemindFloodAffectW(self, TS, floodTS, alpha)
-            % recall flood
+        function P_recalled = RecallMix(self, TS, floodTS)
             P_now = self.T.getPattern(TS);
             P_then = self.T.getPattern(floodTS);
-            P_recall_start = cat(2,P_now(1:self.T.nT0),P_then(self.T.nT0 + (1:self.T.nF)));
-            P_recalled = self.H.Recall(P_recall_start);
-            % recall cost
-            rememberedCost = P_recalled * self.wHA';            
-            % impose on present
-            self.wHA = self.wHA + alpha * P_recalled.*rememberedCost/self.H.nU;
+            P_mix = [P_now(1:self.T.nT0), P_then((self.T.nT0+1):end)];
+            P_recalled = self.H.Recall(P_mix);
         end
         
-        function AlleviateMemory(self, TS, floodTS, alpha)
-            % recall flood
-            P_then = self.T.getPattern(floodTS);
-            P_recalled = self.H.Recall(P_then);
-            % recall cost
+        function RemindFlood(self, ~, floodTS, alpha)
+            P_recalled = self.RecallFlood(floodTS);
+            self.H.AddOnePattern(P_recalled, alpha);
+        end
+               
+        function AlleviateFlood(self, ~, floodTS, alpha)
+            P_recalled = self.RecallFlood(floodTS);
             rememberedCost = P_recalled * self.wHA';            
             % alleviate
             self.wHA = self.wHA - alpha * P_recalled.*rememberedCost/self.H.nU;
         end
             
-        function [M,R] = TestRecall(self, TS, floodTS)
+        function [rememory,recalledCost] = TestRecall(self, TS, floodTS)
             % recall flood
-            P_now = self.T.getPattern(TS);
             P_then = self.T.getPattern(floodTS);
-            %P_then(1:self.T.nT0) = rand(self.T.nT0,1)>0.5;
-            P_mix = [P_now(1:self.T.nT0), P_then((self.T.nT0+1):end)];
-            P_recalled = self.H.Recall(P_mix);
+            P_recalled = self.RecallMix(TS, floodTS);
             C = corrcoef(P_recalled, P_then);
-            M = C(2);
-            if M > 0
-                R = P_recalled*self.wHA';
+            rememory = C(2);
+            if rememory > 0
+                recalledCost = P_recalled*self.wHA';
             else % Hopfield can invert
-                M = -M;
-                R = -P_recalled * self.wHA';
+                rememory = -rememory;
+                recalledCost = -P_recalled * self.wHA';
             end
         end
 

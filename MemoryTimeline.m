@@ -6,7 +6,7 @@ classdef MemoryTimeline < handle
         nTimeSteps = 1000; % number of timestep
         
         T; % timeline pattern                
-        martingaleBits = 1;
+        martingaleBits = 0.005;  % if an integer > 1 then flip this many bits. if a float < 1, then p of flipping a bit
     end
     
     methods
@@ -39,8 +39,12 @@ classdef MemoryTimeline < handle
         function ResetMartingale(self, TS)
            % resets the Martingale at time TS
            self.T(TS,1:self.nT0) = 2*(rand(1,self.nT0) > 0.5)-1;
-           for iTS = TS+1:self.nTimeSteps               
-               bitsToFlip = randi(self.nT0,[self.martingaleBits,1]);
+           for iTS = TS+1:self.nTimeSteps
+               if self.martingaleBits < 1
+                   bitsToFlip = rand(self.nT0,1) < self.martingaleBits;
+               else
+                   bitsToFlip = randi(self.nT0,[self.martingaleBits,1]);
+               end
                self.T(iTS, 1:self.nT0) = self.T(iTS-1, 1:self.nT0);
                self.T(iTS, bitsToFlip) = -self.T(iTS, bitsToFlip);
            end

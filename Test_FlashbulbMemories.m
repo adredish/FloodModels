@@ -1,7 +1,8 @@
 %%
 clear; clear class agent; close all; clc
+%%
 set(0,'DefaultFigureWindowStyle','docked')
-nA = 50;
+nA = 5;
 nTS = 1000;
 floodTS = 50;
 reminders = [250 450 650];
@@ -15,26 +16,21 @@ for iR = 1:length(reminders)
 end
 disp('done');
 %%
-ShowParm('AssetCost', nTS, R, L, 100, reminders);
-ShowParm('Rememory', nTS, R, L, 100, reminders);
-ShowParm('RememberedCost', nTS, R, L, 100, reminders);
+ShowParm('AssetCost', nTS, R, L, floodTS, reminders);
+ShowParm('Rememory', nTS, R, L, floodTS, reminders);
+ShowParm('RememberedCost', nTS, R, L, floodTS, reminders);
 
 %%
-% ShowParmTopN('AssetCost', nTS, R, L, 100, reminders, 10);
-% ShowParmTopN('Rememory', nTS, R, L, 100, reminders, 10);
-% ShowParmTopN('RememberedCost', nTS, R, L, 100, reminders, 10);
+ShowAgentHistogram('AssetCost', R, L, floodTS, reminders);
+ShowAgentHistogram('Rememory', R, L, floodTS, reminders);
+ShowAgentHistogram('RememberedCost', R, L, floodTS, reminders);
 
 %%
-ShowAgentHistogram('AssetCost', R, L, 100, reminders);
-ShowAgentHistogram('Rememory', R, L, 100, reminders);
-ShowAgentHistogram('RememberedCost', R, L, 100, reminders);
+ShowAgentPlot('AssetCost', R, L, floodTS, reminders);
+ShowAgentPlot('Rememory', R, L, floodTS, reminders);
+ShowAgentPlot('RememberedCost', R, L, floodTS, reminders);
 
-%%
-ShowAgentPlot('AssetCost', R, L, 100, reminders);
-ShowAgentPlot('Rememory', R, L, 100, reminders);
-ShowAgentPlot('RememberedCost', R, L, 100, reminders);
-
-%%
+%% ========================================================================
 function ShowAgentHistogram(parm, R, ~, floodTS, reminders)
 figure;
 for iR = 1:length(R)
