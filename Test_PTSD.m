@@ -1,9 +1,9 @@
-%%
-clear; clear class agent; close all; clc
+clear;
+
 %%
 set(0,'DefaultFigureWindowStyle','docked')
-nA = 5;
-nTS = 1000;
+nA = 50;
+nTS = 500;
 floodTS = 50;
 reminderDelta = [50 100 200];
 reminderAlpha = 0.25;
@@ -17,6 +17,7 @@ for iR = 1:length(reminderDelta)
     L{iR+1} = sprintf('reminders every %d steps', reminderDelta(iR));
 end
 disp('done');
+
 %%
 ShowParm('AssetCost', nTS, R, L, floodTS, []);
 ShowParm('Rememory', nTS, R, L, floodTS, []);

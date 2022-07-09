@@ -1,9 +1,9 @@
 %%
-clear; clear class agent; close all; clc
+clear;
 %%
 set(0,'DefaultFigureWindowStyle','docked')
-nA = 5;
-nTS = 500;
+nA = 50;
+nTS = 1000;
 floodTS = 50;
 alleviations = [100 250 400];
 alleviationAlpha = 0.25;

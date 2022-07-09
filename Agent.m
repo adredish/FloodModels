@@ -138,8 +138,6 @@ classdef Agent < handle
                 rememory = -rememory;
                 recalledCost = -P_recalled * self.wHA';
             end
-        end
-
-        
+        end        
     end
 end    
