@@ -8,7 +8,9 @@ for iR = 1:length(R)
 end
 ylim([0 1]);
 
-line([floodTS floodTS], ylim, 'color', 'r');
+for iR = 1:length(floodTS)
+    line([floodTS(iR) floodTS(iR)], ylim, 'color', 'r');
+end
 for iR = 1:length(remindersTS)
     line([remindersTS(iR) remindersTS(iR)], ylim, 'color', 'm');
 end

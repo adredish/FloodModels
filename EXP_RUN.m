@@ -7,10 +7,10 @@ cost = 0.75; % [0 1 5 10 20];
 floodTS = 100;
 
 reminderTS = [];
-reminderAlpha = 0;
+reminderAlpha = nan;
 
 alleviationTS = [];
-alleviationAlpha = 0;
+alleviationAlpha = nan;
 
 AgentType = @Agent; % @AgentContinuous
 process_varargin(varargin);
@@ -19,8 +19,8 @@ process_varargin(varargin);
 % randomize seed
 rng('shuffle');
 
-if any(reminderTS), assert(reminderAlpha > 0, 'if have reminders, reminderAlpha must be specified'); end
-if any(alleviationTS), assert(alleviationAlpha > 0, 'if have alleviations, alleviationAlpha must be specified'); end
+if any(reminderTS), assert(~isnan(reminderAlpha), 'if have reminders, reminderAlpha must be specified'); end
+if any(alleviationTS), assert(~isnan(alleviationAlpha), 'if have alleviations, alleviationAlpha must be specified'); end
 
 %---------------------------------------------
 % prep R
@@ -58,7 +58,11 @@ for iS = 1:nS
             A = AgentType('nTimeSteps', nTS);
             R.AgentType = A.Name;
             
-            A.AddEventToList({@A.ImposeFlood, floodTS, salience(iS), cost(iC)});
+            if any(floodTS)
+                for iR = 1:length(floodTS)
+                    A.AddEventToList({@A.ImposeFlood, floodTS(iR), salience(iS), cost(iC)});
+                end
+            end
             if any(reminderTS)
                 for iR = 1:length(reminderTS)
                     A.AddEventToList({@A.RemindFlood, reminderTS(iR), floodTS, reminderAlpha});
@@ -70,7 +74,7 @@ for iS = 1:nS
                 end
             end
             
-            [AssetCost(iS,iC,iA,:), RememberedCost(iS,iC,iA,:), Rememory(iS,iC,iA,:)] = A.runTimeline('flagTestRecall', floodTS);
+            [AssetCost(iS,iC,iA,:), RememberedCost(iS,iC,iA,:), Rememory(iS,iC,iA,:)] = A.runTimeline('flagTestRecall', floodTS(1));
             
             delete(A);
         end

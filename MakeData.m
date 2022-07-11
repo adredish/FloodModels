@@ -5,6 +5,18 @@ clear
 Test_FlashbulbMemories;
 save DATA_Reminders.mat
 
+%% MultipleFloods
+disp('-------------------------- Multiple Floods ------------------');
+clear
+Test_MultipleFloods;
+save DATA_MultipleFloods
+
+%% Reassessments
+disp('-------------------------- Reassessments ------------------');
+clear
+Test_Reassessments;
+save DATA_Reassessments
+
 %% Alleviations
 disp('-------------------------- Alleviations ------------------');
 clear
