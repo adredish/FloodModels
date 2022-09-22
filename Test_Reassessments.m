@@ -4,7 +4,7 @@ clear;
 set(0,'DefaultFigureWindowStyle','docked')
 nA = 50;
 nTS = 1000;
-floodTS = 5;
+floodTS = 50;
 alleviations = [100 250 400];
 alleviationAlpha = -0.25;  % negative alleviation is recognition that flood was more expensive than previously thought
 AgentType = @Agent;
@@ -17,6 +17,6 @@ for iR = 1:length(alleviations)
 end
 disp('done');
 %%
-ShowParm('AssetCost', nTS, R, L, floodTS, alleviations);
-ShowParm('Rememory', nTS, R, L, floodTS, alleviations);
-ShowParm('RememberedCost', nTS, R, L, floodTS, alleviations);
+ShowParm('AssetCost', 'Reassessment', nTS, R, L, floodTS, alleviations);
+ShowParm('Rememory', 'Reassessment',nTS, R, L, floodTS, alleviations);
+ShowParm('RememberedCost', 'Reassessment',nTS, R, L, floodTS, alleviations);
