@@ -6,6 +6,7 @@ classdef (Abstract) MemoryModule < handle
     % weight matrix is nU x nU
     
     properties         
+        FLAG_keepTrackOfPatterns = false;
         P % stored patterns [nU x nP]
         M % weight matrix [nU x nU]
         
@@ -14,15 +15,17 @@ classdef (Abstract) MemoryModule < handle
     end
     
     methods        
+        function z = myName(~), z = 'MemoryModuleAbstract'; end
+
         % constructor
         function self  = MemoryModule(nU)  
             self.M = zeros(nU, nU);
             self.P = [];
         end
 
-        % get parms        
-        function z = nU(self); z = size(self.M,1); end
-        function z = nP(self); z = size(self.P,2); end
+        % get parms  
+        function z = nU(self), z = size(self.M,1); end
+        function z = nP(self), z = size(self.P,2); end
 
         % functions we can define here
         function AddPatterns(self, P0, alpha)
@@ -35,8 +38,9 @@ classdef (Abstract) MemoryModule < handle
         % baseline matrices
         function InitializeMatrix(self, z)
             if nargin==2 && ischar(z) || isstring(z)
-                load(z, 'M0');          
-                self.M = M0(randi(length(M0), self.nU, self.nU));
+                Z = load(z);
+                assert(Z.nU == self.nU, 'stored nUnits [%d] is not the same as current nUnits [%d]', Z.nU, self.nU);
+                self.M = Z.M0(randi(length(Z.M0), self.nU, self.nU));
             else
                 self.myInitializeMatrix(z);
             end
@@ -60,13 +64,14 @@ classdef (Abstract) MemoryModule < handle
     end    
 
     methods (Static)
-        function SaveBaselineMatrix(constructor, nP, nU, fn)
-            % call with @constructor, nP, fn            
+        function SaveBaselineMatrix(constructor, nP, nU)
+            % call with @constructor, nP, nU          
             H = constructor(nU);
+            fn = sprintf('%s-BaselineStore.mat', H.myName);
             P = H.MakePatterns(nP, nU);
             H.AddPatterns(P);
             M0 = H.M(:);
-            save(fn, 'M0');
+            save(fn, 'M0', 'nU', 'nP');
             fprintf('Wrote M0 with %d patterns and %d units to %s.\n', nP, nU, fn);
         end
     end

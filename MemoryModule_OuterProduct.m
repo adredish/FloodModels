@@ -9,18 +9,17 @@ classdef MemoryModule_OuterProduct < MemoryModule
     properties        
     end
     
-    methods                       
+    methods                     
+        function z = myName(~), z = 'MemoryModule_OuterProduct'; end
+
         % general methods
         function AddOnePattern(self, P0, alpha)
             if nargin == 2, alpha = 1; end
             P0 = self.renorm(P0);
             MP = alpha * (P0 * P0'); % memory pattern: outer product
-            if self.nP ==0 % first pattern
-                self.P = P0;
-                self.M = MP;
-            else
+            self.M = self.M + MP;
+            if self.FLAG_keepTrackOfPatterns
                 self.P = cat(2, self.P, P0);
-                self.M = self.M + MP;
             end
         end
               

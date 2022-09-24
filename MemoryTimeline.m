@@ -14,7 +14,7 @@ classdef MemoryTimeline < handle
         pF, nF; % number of elements in the feature space
         nU; % total units
         martingaleUnits, featureUnits;  % booleans for those units
-        martingaleNoise = 0.1;  % percent change from step to step
+        martingaleNoise = 0.01;  % percent change from step to step
         
         nT = 750; % number of timesteps
         
@@ -48,7 +48,7 @@ classdef MemoryTimeline < handle
                 switch(V{iV})
                     case 'pM', self.pM = V{iV+1};
                     case 'martingaleNoise', self.martingaleNoise = V{iV+1};
-                    case 'nT', self.nTimeSteps = V{iV+1};
+                    case 'nT', self.nT = V{iV+1};
                 end
             end
         end
