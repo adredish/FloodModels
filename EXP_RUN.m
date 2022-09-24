@@ -1,26 +1,24 @@
 function R = EXP_RUN(varargin)
 
 nA = 25;
-nTS = 500;
-salience = 1; % [0 1 2 5 10];
+nTS = 1000;
+salience = 0.1; % [0 1 2 5 10];
 cost = 0.75; % [0 1 5 10 20];
 floodTS = 100;
 
-reminderTS = [];
-reminderAlpha = nan;
+eventsTS = [];
+reminderAlphas = [];
+costDeltas = [];
 
-alleviationTS = [];
-alleviationAlpha = nan;
-
-AgentType = @Agent; % @AgentContinuous
+AgentType = @AgentM; % @AgentContinuous @AgentHopfield
 process_varargin(varargin);
 
 %---------------------------------------------
 % randomize seed
 rng('shuffle');
 
-if any(reminderTS), assert(~isnan(reminderAlpha), 'if have reminders, reminderAlpha must be specified'); end
-if any(alleviationTS), assert(~isnan(alleviationAlpha), 'if have alleviations, alleviationAlpha must be specified'); end
+assert(length(eventsTS) == length(reminderAlphas));
+assert(length(eventsTS) == length(costDeltas));
 
 %---------------------------------------------
 % prep R
@@ -28,10 +26,9 @@ nS = length(salience);  R.salience = salience;
 nC = length(cost); R.cost = cost;
 
 R.events.flood = floodTS;
-R.events.reminderTS = reminderTS;
-R.events.reminderAlpha = reminderAlpha;
-R.events.alleviationTS = alleviationTS;
-R.events.alleviationAlpha = alleviationAlpha;
+R.events.events = eventsTS;
+R.events.reminderAlphas = reminderAlphas;
+R.events.costDeltas = costDeltas;
 
 AssetCost = nan(nS, nC, nA, nTS);
 RememberedCost = nan(nS, nC, nA, nTS);
@@ -43,7 +40,7 @@ T = nan(nS*nC); iT = 1;
 for iS = 1:nS
     for iC = 1:nC        
         tic;
-        fprintf('s=%.1f; c = %.1f: ', salience(iS), cost(iC));
+        fprintf('s=%.1f; c = %.2f: ', salience(iS), cost(iC));
         
         for iA = 1:nA
             
@@ -63,14 +60,9 @@ for iS = 1:nS
                     A.AddEventToList({@A.ImposeFlood, floodTS(iR), salience(iS), cost(iC)});
                 end
             end
-            if any(reminderTS)
-                for iR = 1:length(reminderTS)
-                    A.AddEventToList({@A.RemindFlood, reminderTS(iR), floodTS, reminderAlpha});
-                end
-            end
-            if any(alleviationTS)
-                for iR = 1:length(alleviationTS)
-                    A.AddEventToList({@A.AlleviateFlood, alleviationTS(iR), floodTS, alleviationAlpha});
+            if any(eventsTS)
+                for iR = 1:length(eventsTS)
+                    A.AddEventToList({@A.RemindFlood, eventsTS(iR), floodTS, reminderAlphas(iR), costDeltas(iR)});
                 end
             end
             

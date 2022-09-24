@@ -57,6 +57,7 @@ classdef Hopfield < handle
         end
         
         function AddOnePattern(self, P, alpha)
+            if nargin == 2, alpha = 1; end
             [nP, nU] = size(P); assert(nU == self.nU);
             assert(size(alpha,1)==nP || size(alpha,1)==1); assert(size(alpha,2)==1);
             self.W = (1-self.tau) * self.W + (alpha .* P)' * P;
@@ -67,10 +68,16 @@ classdef Hopfield < handle
                 clf;
                 subplot(211); hold off; plot(nan, nan); hold on; bar(self.P'); title('patterns'); ylim([0 1]);
                 subplot(212); imagesc(self.W); title('weights');
-            end
-            
+            end            
         end
         
+        function AddPatterns(self, P, alpha)
+            if nargin ==2, alpha = 1; end
+            [nP, nU] = size(P);
+            for iP = 1:nP
+                self.AddOnePattern(P, alpha);
+            end
+        end
        
         function X = Recall(self, X0)
             
@@ -106,35 +113,37 @@ classdef Hopfield < handle
             end
         end
         
-        function D = DistanceToPatterns(self, X0)
-            D = sum((X0-self.P).^2,2);
-        end
-        
-        function R = RandPattern(self)
-            R = 2*rand(1,self.nU)<0.5-1;
-        end
     end
     
     methods(Static)
-        function P = MakePattern(nP, nU, p)
-            P = 2*double(rand(nP, nU)<p)-1;
+        function P = MakePattern(nP, nU)
+            P = 2*double(rand(nP, nU)<0.5)-1;
+        end
+                
+        function D = DistanceToPatterns(P, X0)
+            D = mean((X0-P).^2,2);
         end
         
-        function ShowPattern(P)
-            P(P==-1) = 0;
-            [nP,nU] = size(P); %#ok<*ASGLU>
-            for iP = 1:nP
-                fprintf('%1d',P(iP,:));fprintf('\n');
-            end
+        function S = PatternSimilarity(P, X0)
+            S = 1 - 0.5 * Hopfield.DistanceToPatterns(P, X0);
+        end
+                
+        function P = Noise_ReplaceRand(P, eta)
+            [nP, nU] = size(P);
+            randYN = rand(nP,nU) < eta;
+            R = Hopfield.MakePattern(nP, nU);
+            P(randYN) = R(randYN);
+        end
+        
+        function P = Noise_FlipRand(P, eta)
+            [nP, nU] = size(P);
+            randYN = rand(nP,nU) < eta;
+            P(randYN) = -P(randYN);
         end
         
         function P = AddNoise(P, eta)
-            [nP, nU] = size(P);
-            nFlip = ceil(eta * nU);
-            toFlip = randi(nU, nP, nFlip);
-            for iP = 1:nP
-                P(iP,toFlip) = -P(iP,toFlip);
-            end
+            %P = Hopfield.Noise_ReplaceRand(P, eta);
+            P = Hopfield.Noise_FlipRand(P, eta);
         end
         
         function Test
