@@ -9,17 +9,17 @@ go(@MemoryModule_OuterProduct, 'OP');
 go(@MemoryModule_Hopfield, 'Hopfield');
 %%
 function go(constructor, T)
-nU = 100; nP = 3; nB = 10;
+nU = 500; nP = 10; nB = 10;
 figure;
 
 R = SimilarityOfRandomPatterns(constructor, nU, 100);
 
-subplot(2,1,1); 
+subplot(3,1,1); 
 S = Test(constructor, nU, nP, 0.1);
 imagesc(S); colorbar; title(sprintf('%s: BasicTest', T));
 caxis([mean(R) 1])
 
-subplot(2,1,2); cla; hold on
+subplot(3,1,2); cla; hold on
 N = linspace(0,5,100);
 S = PatternSimilarityNoRecall(constructor, nU, nB, N);
 h(1) = ShadedErrorbar(N, nanmean(S), nanstderr(S), 'color','k');
@@ -31,6 +31,19 @@ line(xlim, nanmean(R) * [1 1], 'color', 'k', 'LineWidth', 2);
 line(xlim, nanmean(R) * [1 1] + nanstderr(R), 'color', 'k', 'LineStyle', ':');
 line(xlim, nanmean(R) * [1 1] - nanstderr(R), 'color', 'k', 'LineStyle', ':');
 legend(h, 'no recall', '1 P stored', sprintf('%d P stored', nP));
+
+subplot(3,1,3); cla; hold on; clear h
+R = Test_Framing(constructor, 'nU', 500, 'nB', 25);
+nP = length(R.p1);
+h(1) = errorbar(1:nP, nanmean(R.S(:,:,1)), nanstderr(R.S(:,:,1)), 'b');
+h(2) = errorbar(1:nP, nanmean(R.S(:,:,2)), nanstderr(R.S(:,:,2)), 'r');
+legend('Pattern 1', 'Pattern 2');
+ylabel('probability of recall');
+xlabel('proportion included');
+xL = cell(nP,1); for iL = 1:nP; xL{iL} = sprintf('%.2f', R.p1(iL)/R.nU); end
+set(gca, 'XTick', 1:10:nP, 'XTickLabel', xL(1:10:nP));
+%%
+
 end
 %%
 function S = Test(constructor, nU, nP, noise)
