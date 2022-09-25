@@ -3,14 +3,14 @@ classdef MemoryModule_Hopfield < MemoryModule
     properties
         eta = 1;
         sigmoid = @sign;
-        stoppingCriterion = @(X,X0)all(X==X0);
-        
+
         maxSteps = 100;
+        stoppingCriterion = 0.01;
     end
     
     methods
         function z = myName(~), z = 'MemoryModule_Hopfield'; end
-        
+              
         function AddOnePattern(self, P0, alpha)
             if nargin == 2, alpha = 1; end
             MP = alpha * (P0 * P0'); % memory pattern: outer product
@@ -18,19 +18,18 @@ classdef MemoryModule_Hopfield < MemoryModule
             
             if self.FLAG_keepTrackOfPatterns
                 self.P = cat(2, self.P, P0);
-            end
+            end                       
             
         end
         
         function X = Recall(self, X0)
+            % note that this is doing each cycle synchronously rather than
+            % asynchronously, which Hopfield requires, but asynchronous is
+            % incredibly slow.
             X = X0;
             for iStep = 1:self.maxSteps
-                samples = randperm(self.nU);
-                for iX = samples
-                    U = self.M(iX,:) * X;
-                    X(iX) = self.sigmoid(U + self.eta * randn);
-                end
-                if self.stoppingCriterion(X,X0), break; end
+                X = self.sigmoid(self.M * X0 + self.eta * randn(self.nU,1));
+                if mean(abs(X-X0)) < self.stoppingCriterion, break; end
                 X0=X;
             end
         end

@@ -5,6 +5,7 @@ clear; clc; close all;
 
 %%
 go(@MemoryModule_OuterProduct, 'OP');
+%%
 go(@MemoryModule_Hopfield, 'Hopfield');
 %%
 function go(constructor, T)

@@ -6,7 +6,7 @@ classdef (Abstract) MemoryModule < handle
     % weight matrix is nU x nU
     
     properties         
-        FLAG_keepTrackOfPatterns = false;
+        FLAG_keepTrackOfPatterns = true;
         P % stored patterns [nU x nP]
         M % weight matrix [nU x nU]
         

@@ -33,8 +33,8 @@ classdef MemoryTimeline < handle
             self.nF = self.nU - self.nM;
             self.pF = self.nF/self.nU;
             
-            self.martingaleUnits = 1:self.nM;
-            self.featureUnits = (self.nM +(1:self.nF));
+            self.martingaleUnits = [true(self.nM,1); false(self.nF,1)];
+            self.featureUnits = ~self.martingaleUnits;
             
             % make patterns
             self.M = M;
