@@ -4,7 +4,7 @@ clear; clc; close all; pack
 M = @MemoryModule_Hopfield;
 %M = @MemoryModule_OuterProduct;
 
-nA = 25;
+nA = 5;
 
 %% baseline
 R = Run1Exp('Memory2use', M, 'nA', nA);

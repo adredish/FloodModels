@@ -88,7 +88,7 @@ classdef Agent < handle
                 P0 = self.M.Recall(P);
                 A(iT) = self.wHA * P0;                
                 if floodTS
-                    [M(iT), R(iT)] = self.TestRecall(P0, floodTS); %#ok<*UNRCH>
+                    [M(iT), R(iT)] = self.TestRecall(iT, floodTS); %#ok<*UNRCH>
                 end                
             end            
         end
@@ -111,23 +111,24 @@ classdef Agent < handle
             self.wHA = self.wHA + delta * P_recalled'.*rememberedCost/self.M.nU;
         end
                   
-        function P_recalled = RecallFlood(self, TS, floodTS)
-            P_then = self.T.GetPattern(floodTS);
+        function P_recalled = RecallFlood(self, now, then)
+            P_then = self.T.GetPattern(then);
             P_mix = P_then;             
             P_mix(self.T.martingaleUnits) = zeros(1, self.T.nM);
             P_recalled = self.M.Recall(P_mix);
         end
         
-        function P_recalled = RecallMix(self, TS, floodTS)
-            P_now = self.T.GetPattern(TS);
-            P_then = self.T.GetPattern(floodTS);
+        function P_recalled = RecallMix(self, now, then)
+            P_now = self.T.GetPattern(now);
+            P_then = self.T.GetPattern(then);
             P_mix = [P_now(self.T.martingaleUnits); P_then(self.T.featureUnits)];
             P_recalled = self.M.Recall(P_mix);
         end
         
-        function [rememory, recalledCost] = TestRecall(self, P_recalled, floodTS)
+        function [rememory, recalledCost] = TestRecall(self, now, then)
             % recall flood
-            rememory = self.M.PatternSimilarity(P_recalled, self.T.GetPattern(floodTS));
+            P_recalled = RecallFlood(self, now, then);
+            rememory = self.M.PatternSimilarity(P_recalled, self.T.GetPattern(then));
             recalledCost = self.wHA * P_recalled;
         end        
     end
