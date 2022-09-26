@@ -12,9 +12,8 @@ classdef MemoryModule_Hopfield < MemoryModule
         function z = myName(~), z = 'MemoryModule_Hopfield'; end
               
         function AddOnePattern(self, P0, alpha)
-            if nargin == 2, alpha = 1; end
-            MP = alpha * (P0 * P0'); % memory pattern: outer product
-            self.M = self.M + MP;
+            if nargin == 2, alpha = 1; end            
+            self.M = self.M + alpha * (P0 * P0'); % memory pattern: outer product
             
             if self.FLAG_keepTrackOfPatterns
                 self.P = cat(2, self.P, P0);
@@ -48,6 +47,9 @@ classdef MemoryModule_Hopfield < MemoryModule
             for iP = 1:nP, for iX = 1:nX
                     S(iP,iX) = mean(P(:,iP) == X(:,iX));
                 end; end
+            % pattern similarity of random patterns ranges from 0.5 to 1 
+            % so need to rescale from 0 to 1
+            S = (S-0.5)*2;
         end
         
         function P = AddNoise(P, eta)

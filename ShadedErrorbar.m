@@ -50,6 +50,3 @@ if H
 else
     hold off;
 end
-	
-
-

@@ -29,6 +29,7 @@ classdef Agent < handle
         function self = Agent(memorymodule_constructor, nU, nT, varargin)
             
             self.M = memorymodule_constructor(nU);
+            self.M.FLAG_keepTrackOfPatterns = false;  % for speed - they are all in the MemoryTimeline anyway
             self.T = MemoryTimeline(self.M, 'nT', nT, varargin{:});
             
             self.nU = self.T.nU;
@@ -63,14 +64,12 @@ classdef Agent < handle
             % A is asset cost at time t
             % R is memory of asset cost given recall of M
             % M is correlation with old memory
-            flagTestRecall = 0; % if nonzero, then is number of trial to compare to
+            floodTS = 0; % if nonzero, then is number of trial to compare to
             process_varargin(varargin);
             
             A = nan(self.nT,1);
-            if flagTestRecall
-                R = nan(self.nT,1);
-                M = nan(self.nT,1);
-            end
+            R = nan(self.nT,1);
+            M = nan(self.nT,1);
             
             eventTS = cellfun(@(x) x{2}, self.timelineEvents, 'UniformOutput', true);  % get times to act
             for iT = 1:self.nT          
@@ -87,10 +86,9 @@ classdef Agent < handle
                 self.M.AddOnePattern(P, self.baselineAlpha);
                 
                 P0 = self.M.Recall(P);
-                A(iT) = self.wHA * P0;
-                
-                if flagTestRecall
-                    [M(iT), R(iT)] = self.TestRecall(iT, flagTestRecall);
+                A(iT) = self.wHA * P0;                
+                if floodTS
+                    [M(iT), R(iT)] = self.TestRecall(P0, floodTS); %#ok<*UNRCH>
                 end                
             end            
         end
@@ -106,17 +104,17 @@ classdef Agent < handle
             self.wHA = self.wHA + P'.*cost/self.M.nU;
         end
                 
-        function RemindFlood(self, ~, floodTS, alpha, delta)  % alpha is change in salience, delta is change in cost
-            P_recalled = self.RecallFlood(floodTS);
+        function RemindFlood(self, TS, floodTS, alpha, delta)  % alpha is change in salience, delta is change in cost
+            P_recalled = self.RecallFlood(TS, floodTS);
             self.M.AddOnePattern(P_recalled, alpha);            
             rememberedCost = self.wHA * P_recalled;
             self.wHA = self.wHA + delta * P_recalled'.*rememberedCost/self.M.nU;
         end
                   
-        function P_recalled = RecallFlood(self, floodTS)
+        function P_recalled = RecallFlood(self, TS, floodTS)
             P_then = self.T.GetPattern(floodTS);
             P_mix = P_then;             
-            P_mix(self.T.martingaleUnits) = self.M.MakePatterns(1, self.T.nM);
+            P_mix(self.T.martingaleUnits) = zeros(1, self.T.nM);
             P_recalled = self.M.Recall(P_mix);
         end
         
@@ -127,11 +125,9 @@ classdef Agent < handle
             P_recalled = self.M.Recall(P_mix);
         end
         
-        function [rememory, recalledCost] = TestRecall(self, TS, floodTS)
+        function [rememory, recalledCost] = TestRecall(self, P_recalled, floodTS)
             % recall flood
-            P_then = self.T.GetPattern(floodTS);
-            P_recalled = self.RecallMix(TS, floodTS);
-            rememory = self.M.PatternSimilarity(P_recalled, P_then);
+            rememory = self.M.PatternSimilarity(P_recalled, self.T.GetPattern(floodTS));
             recalledCost = self.wHA * P_recalled;
         end        
     end
