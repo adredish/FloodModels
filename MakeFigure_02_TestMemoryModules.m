@@ -1,47 +1,73 @@
-% ====================================================
-% TEST Memory Module
-% ====================================================
-clear; clc; close all; 
+function MakeFigure_02_TestMemoryModules(constructor, varargin)
+% MakeFigure_02_TestMemoryModules(constructor)
+separate_figures = false;
 
-%%
-go(@MemoryModule_OuterProduct, 'OP');
-%%
-go(@MemoryModule_Hopfield, 'Hopfield');
-%%
-function go(constructor, T)
 nU = 500; nP = 10; nB = 10;
-figure;
+process_varargin(varargin);
+
+if ~separate_figures
+    figure;
+end
 
 R = SimilarityOfRandomPatterns(constructor, nU, 100);
 
-subplot(3,1,1); 
-S = Test(constructor, nU, nP, 0.1);
-imagesc(S); colorbar; title(sprintf('%s: BasicTest', T));
-caxis([mean(R) 1])
+H = constructor(nU);
+T = H.myName;
 
-subplot(3,1,2); cla; hold on
-N = linspace(0,5,100);
+if separate_figures, figure; else subplot(3,1,1); end
+S = Test(constructor, nU, nP, 0.1);
+imagesc(S); C = colorbar; title(T, 'interpreter', 'none');
+caxis([0 1]); 
+ylabel(C, 'Pattern similarity'); set(C, 'ytick', [0 1]);
+xlabel('Patterns'); ylabel('Patterns'); xticks([]); yticks([]);
+axis square;
+if separate_figures, FigureLayout('layout', [0.5 0.5]); end
+
+if separate_figures, figure; else subplot(3,1,2); end
+cla; hold on
+switch H.myName
+    case 'MM_OuterProduct', N = linspace(0,5,100);
+    case 'Hopfield', N = linspace(0,2,100);
+    otherwise
+        error('Unknown memory module');
+end
+
 S = PatternSimilarityNoRecall(constructor, nU, nB, N);
 h(1) = ShadedErrorbar(N, nanmean(S), nanstderr(S), 'color','k');
 S = PureNoiseTest(constructor, nU, nB, N);
 h(2) = ShadedErrorbar(N, nanmean(S), nanstderr(S), 'color','b');
 S = PatternNoiseTest(constructor, nU, nB, nP, N);
 h(3) = ShadedErrorbar(N, nanmean(S), nanstderr(S), 'color','r');
-line(xlim, nanmean(R) * [1 1], 'color', 'k', 'LineWidth', 2);
-line(xlim, nanmean(R) * [1 1] + nanstderr(R), 'color', 'k', 'LineStyle', ':');
-line(xlim, nanmean(R) * [1 1] - nanstderr(R), 'color', 'k', 'LineStyle', ':');
+line(xlim, [0 0], 'color', 'k', 'LineWidth', 2);
 legend(h, 'no recall', '1 P stored', sprintf('%d P stored', nP));
+yticks([0 1]); ylabel('Pattern similarity');
+if separate_figures, FigureLayout('layout', [0.5 0.5]); end
 
-subplot(3,1,3); cla; hold on; clear h
+switch H.myName
+    case 'MM_OuterProduct',xticks(0:5); xlabel('Noise added (eta * randn())'); 
+    case 'Hopfield', xticks([0 0.5 1 1.5]); xticklabels({'0','0.5','1', 'all'}); xlabel('Noise Added (proportion of bits flipped)');
+    otherwise
+        error('Unknown memory module');
+end
+
+if separate_figures, figure; else subplot(3,1,3); end
+cla; hold on; clear h
 R = Test_Framing(constructor, 'nU', 500, 'nB', 25);
 nP = length(R.p1);
 h(1) = errorbar(1:nP, nanmean(R.S(:,:,1)), nanstderr(R.S(:,:,1)), 'b');
 h(2) = errorbar(1:nP, nanmean(R.S(:,:,2)), nanstderr(R.S(:,:,2)), 'r');
-legend('Pattern 1', 'Pattern 2');
-ylabel('probability of recall');
+line(xlim, [0 0], 'color', 'k', 'LineWidth', 2);
+legend(h,'Pattern 1', 'Pattern 2');
+ylabel('p(recall)');
 xlabel('proportion included');
-xL = cell(nP,1); for iL = 1:nP; xL{iL} = sprintf('%.2f', R.p1(iL)/R.nU); end
-set(gca, 'XTick', 1:10:nP, 'XTickLabel', xL(1:10:nP));
+xL = cell(nP,1); for iL = 1:nP; xL{iL} = sprintf('%.2f:%.2f', R.p1(iL)/R.nU, R.p2(iL)/R.nU); end
+set(gca, 'XTick', [0, nP/2 nP], ...
+    'XTickLabel', arrayfun(@(x,y)sprintf('%.1f:%.1f',x,y), [R.p1(1)/R.nU 0 0], [0 0 R.p2(end)/nU], 'UniformOutput', false));
+yticks([0 1]);
+if separate_figures, FigureLayout('layout', [0.5 0.5]); end
+
+if ~separate_figures, FigureLayout('layout', [0.5 1]); end
+
 %%
 
 end

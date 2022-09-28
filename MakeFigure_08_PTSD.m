@@ -1,28 +1,42 @@
-%% Figure 
-clear; clc; close all; pack
+function MakeFigure_08_PTSD(varargin)
+
+recalculate = true;
 
 M = @MemoryModule_Hopfield;
-%M = @MemoryModule_OuterProduct;
-
 nA = 5;
 
 nT = 1000;
 floodTS = 50;
-reminders = [0 50 100 200];
-alpha = 0.1;
+
+reminderSteps = [0 50 100 200];
+alpha = 0.2;
 delta = 0;
+process_varargin(varargin);
 
 %% go
-for iR = 1:length(reminders)
-    if reminders > 0
-        events = arrayfun(@(x)[x, alpha, delta], (floodTS+reminders(iR)):reminders(iR):nT, 'UniformOutput', false);
+
+R = [];
+if ~recalculate && exist('Data_08_PTSD.mat', 'file')
+    savedData = load('Data_08_PTSD.mat');
+    if isequal(savedData.M,M) && savedData.nA == nA
+        R = savedData.R;
+        L = savedData.L;
+    end
+end
+if isempty(R)
+    
+for iR = 1:length(reminderSteps)
+    if reminderSteps > 0
+        events = arrayfun(@(x)[x, alpha, delta], (floodTS+reminderSteps(iR)):reminderSteps(iR):nT, 'UniformOutput', false);
         L{iR} = 'None';
     else
         events = {};
-        L{iR} = sprintf('Every %d steps', reminders(iR));
+        L{iR} = sprintf('Every %d steps', reminderSteps(iR));
     end
     
     R{iR} = Run1Exp('Memory2use', M, 'nA', nA, 'events', events);
+end
+save Data_08_PTSD.mat R L M nA
 end
 %%
 Show3(R,L); 
@@ -57,4 +71,6 @@ for iA = 1:length(ax)
         line([1 1] * TS(iT), ylim, 'color', c(iT));
     end
 end
+end
+
 end

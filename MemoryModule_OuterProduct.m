@@ -10,7 +10,7 @@ classdef MemoryModule_OuterProduct < MemoryModule
     end
     
     methods                     
-        function z = myName(~), z = 'MemoryModule_OuterProduct'; end
+        function z = myName(~), z = 'MM_OuterProduct'; end
 
         % general methods
         function AddOnePattern(self, P0, alpha)

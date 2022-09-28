@@ -9,7 +9,7 @@ classdef MemoryModule_Hopfield < MemoryModule
     end
     
     methods
-        function z = myName(~), z = 'MemoryModule_Hopfield'; end
+        function z = myName(~), z = 'Hopfield'; end
               
         function AddOnePattern(self, P0, alpha)
             if nargin == 2, alpha = 1; end            
