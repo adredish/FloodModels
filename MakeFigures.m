@@ -5,7 +5,7 @@ clear; close all;
 nA = 50;  % number of agents
 nT = 1000; % length of simulation (timesteps)
 nU = 500;  % 250 martingale units, 250 feature units
-M = @MemoryModule_Hopfield; % M = @MemoryModule_OuterProduct;
+M = @MemoryModule_Hopfield;  % M = @MemoryModule_OuterProduct;
 
 %% prep
 MemoryModule.SaveBaselineMatrix(M, 100, nU);  % creates random weights distributed appropriately for after storing 100 patterns.

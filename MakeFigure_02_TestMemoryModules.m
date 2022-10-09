@@ -45,7 +45,7 @@ if separate_figures, FigureLayout('layout', [0.5 0.5]); end
 
 switch H.myName
     case 'MM_OuterProduct',xticks(0:5); xlabel('Noise added (eta * randn())'); 
-    case 'Hopfield', xticks([0 0.5 1 1.5]); xticklabels({'0','0.5','1', 'all'}); xlabel('Noise Added (proportion of bits flipped)');
+    case 'Hopfield', xticks([0 0.5 1 1.5]); xticklabels({'0','0.5','1', 'all'}); xlabel('Noise Added (proportion of bits randomized)');
     otherwise
         error('Unknown memory module');
 end
