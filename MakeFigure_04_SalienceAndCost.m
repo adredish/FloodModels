@@ -34,7 +34,7 @@ end
 disp('done');
 
 %%
-ShowSalienceCostSet(R, 'AssetCost');
+ShowSalienceCostSet(R, 'AssetCost');  
 ShowSalienceCostSet(R, 'Rememory');
 ShowSalienceCostSet(R, 'RememberedCost');
 
@@ -50,8 +50,8 @@ for iC = 1:nC
     for iS = 1:nS
         subplot(nC+1, nS+1, iP); iP = iP+1;
         X = squeeze(R.(parm)(iS,iC,:,:));
-        %h= ShadedErrorbar(1:nT, nanmean(X), nanstderr(X), 'color', squeeze(c(iS, iC, :)));
-        h = plot(1:nT, nanmean(X), 'color', squeeze(c(iS, iC, :)));
+        h= ShadedErrorbar(1:nT, nanmean(X), nanstderr(X), 'color', squeeze(c(iS, iC, :)));
+        %h = plot(1:nT, nanmean(X), 'color', squeeze(c(iS, iC, :)));
         CleanPlot()
         legend(h,sprintf('s=%.1f\nc=%.2f', salience(iS), cost(iC)));
     end
@@ -60,8 +60,8 @@ for iC = 1:nC
     subplot(nC+1, nS+1, iP); iP = iP+1;
     for jS = 1:nS
         hold on
-        % ShadedErrorbar(1:nT, nanmean(squeeze(R.(parm)(jS,iC,:,:))), nanstderr(squeeze(R.(parm)(jS,iC,:,:))), 'color', squeeze(c(jS, iC, :)));
-        plot(1:nT, nanmean(squeeze(R.(parm)(jS,iC,:,:))), 'color', squeeze(c(jS, iC, :)));
+        ShadedErrorbar(1:nT, nanmean(squeeze(R.(parm)(jS,iC,:,:))), nanstderr(squeeze(R.(parm)(jS,iC,:,:))), 'color', squeeze(c(jS, iC, :)));
+        %plot(1:nT, nanmean(squeeze(R.(parm)(jS,iC,:,:))), 'color', squeeze(c(jS, iC, :)));
     end
     CleanPlot()
 end
@@ -70,8 +70,8 @@ for iS = 1:nS
     subplot(nC+1, nS+1, iP); iP = iP+1;
     for jC = 1:nC
         hold on
-        % ShadedErrorbar(1:nT, nanmean(squeeze(R.(parm)(iS,jC,:,:))), nanstderr(squeeze(R.(parm)(iS,jC,:,:))), 'color', squeeze(c(iS, jC, :)));
-        plot(1:nT, nanmean(squeeze(R.(parm)(iS,jC,:,:))), 'color', squeeze(c(iS, jC, :)));
+        ShadedErrorbar(1:nT, nanmean(squeeze(R.(parm)(iS,jC,:,:))), nanstderr(squeeze(R.(parm)(iS,jC,:,:))), 'color', squeeze(c(iS, jC, :)));
+        %plot(1:nT, nanmean(squeeze(R.(parm)(iS,jC,:,:))), 'color', squeeze(c(iS, jC, :)));
     end
     CleanPlot()
 end
@@ -102,5 +102,6 @@ end
         end
     end
 
+    sgtitle(parm);
 end
 end

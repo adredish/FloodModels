@@ -41,7 +41,7 @@ X = X(keep); L = Y(keep)-L(keep); U = Y(keep)+U(keep); Y = Y(keep);
 h0 = patch([X; X(end:-1:1); X(1)], [L; U(end:-1:1); L(1)], 'k');
 set(h0, 'FaceColor', color, 'EdgeColor', 'None', 'FaceAlpha', 0.25);
 
-h0 = patch([X; X(end:-1:1); X(1)], [L; U(end:-1:1); L(1)], color);
+h0 = patch([X; X(end:-1:1); X(1)], [L; U(end:-1:1); L(1)], 'k');
 set(h0, 'FaceColor', color, 'EdgeColor', 'None', 'FaceAlpha', faceAlpha);
 h = plot(X, Y, 'Color', color, 'Marker', marker, 'LineWidth', lineWidth, 'LineStyle', lineStyle);
 
