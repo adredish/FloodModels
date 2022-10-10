@@ -46,7 +46,6 @@ disp('done');
 %% Figure 08
 close all hidden; 
 MakeFigure_08_PTSD('M', M, 'nA', nA);
-FigureLayout('layout', [1 1], 'scaling', 2);
 myPrint('F08-PTSD-');
 disp('done');
 

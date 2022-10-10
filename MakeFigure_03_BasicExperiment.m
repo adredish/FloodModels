@@ -31,9 +31,9 @@ Show3(R.baseline, 'k', 'separate_figures', separate_figures);
 
 Show3(R.reminder, 'm', 'separate_figures', separate_figures); 
 
-Show3(R.reassessment, 'b', 'separate_figures', separate_figures); 
+Show3(R.reassessment, 'm', 'separate_figures', separate_figures); 
 
-Show3(R.alleviation, 'b', 'separate_figures', separate_figures);
+Show3(R.alleviation, 'm', 'separate_figures', separate_figures);
 
 %% ======================================
 

@@ -42,9 +42,7 @@ end
 c = 'kmbcr';
 fig2use = figure;
 for iR = 1:length(R)
-    fig2use = Show3(R{iR}, c(iR), 'separate_figures', false, 'linesColor', c(iR), 'fig2use', fig2use);
-    ax = findobj('Parent', fig2use, 'Type', 'axes');
-    hold(ax, 'on');
+    fig2use = Show3(R{iR}, c(iR), 'separate_figures', false, 'linesColor', [], 'fig2use', fig2use);
+    Show3(R{iR}, c(iR), 'separate_figures', false, 'linesColor', c(iR));
 
-%     Show3(R{iR}, c(iR), 'separate_figures', false, 'linesColor', c(iR));
 end
